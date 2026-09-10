@@ -1,0 +1,331 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+  <title>Contact | Live Chat Overlay Maker</title>
+
+  <meta
+    name="description"
+    content="Live Chat Overlay Makerへのお問い合わせについてご案内します。"
+  >
+
+  <style>
+    :root {
+      --bg: #061321;
+      --bg-deep: #030b14;
+      --panel: #0b1d31;
+      --line: rgba(70, 170, 255, 0.24);
+
+      --text: #f5f8fc;
+      --muted: #aab9ca;
+
+      --blue: #1688ff;
+      --cyan: #1dc8ff;
+
+      --max-width: 980px;
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      margin: 0;
+      font-family:
+        -apple-system,
+        BlinkMacSystemFont,
+        "Segoe UI",
+        "Noto Sans JP",
+        sans-serif;
+      color: var(--text);
+      background:
+        radial-gradient(
+          circle at 70% 0%,
+          rgba(22, 136, 255, 0.14),
+          transparent 28%
+        ),
+        linear-gradient(
+          180deg,
+          var(--bg) 0%,
+          var(--bg-deep) 100%
+        );
+      line-height: 1.85;
+    }
+
+    a {
+      color: var(--cyan);
+      text-decoration: none;
+    }
+
+    a:hover {
+      text-decoration: underline;
+    }
+
+    .container {
+      width: min(calc(100% - 40px), var(--max-width));
+      margin: 0 auto;
+    }
+
+    header {
+      border-bottom: 1px solid rgba(255, 255, 255, 0.07);
+      background: rgba(3, 11, 20, 0.9);
+    }
+
+    .nav {
+      min-height: 72px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 20px;
+    }
+
+    .brand {
+      color: var(--text);
+      font-weight: 700;
+      font-size: 18px;
+    }
+
+    .brand span {
+      color: var(--cyan);
+    }
+
+    .back {
+      color: #c8d6e5;
+      font-size: 14px;
+    }
+
+    main {
+      padding: 72px 0 90px;
+      min-height: calc(100vh - 160px);
+    }
+
+    .eyebrow {
+      color: var(--cyan);
+      font-size: 12px;
+      font-weight: 700;
+      letter-spacing: 0.18em;
+    }
+
+    h1 {
+      margin: 8px 0 16px;
+      font-size: clamp(38px, 7vw, 60px);
+      letter-spacing: -0.04em;
+      line-height: 1.15;
+    }
+
+    .lead {
+      margin-bottom: 36px;
+      color: var(--muted);
+    }
+
+    .contact-card {
+      padding: 34px;
+      border: 1px solid var(--line);
+      border-radius: 16px;
+      background:
+        linear-gradient(
+          160deg,
+          rgba(16, 41, 67, 0.84),
+          rgba(6, 20, 34, 0.84)
+        );
+    }
+
+    h2 {
+      margin: 0 0 14px;
+      font-size: 24px;
+    }
+
+    p,
+    li {
+      color: #c0cede;
+      font-size: 15px;
+    }
+
+    ul {
+      padding-left: 22px;
+    }
+
+    .email-box {
+      margin: 28px 0;
+      padding: 22px;
+      border: 1px solid rgba(29, 200, 255, 0.28);
+      border-radius: 12px;
+      background: rgba(22, 136, 255, 0.08);
+    }
+
+    .email-label {
+      margin-bottom: 5px;
+      color: var(--muted);
+      font-size: 13px;
+    }
+
+    .email {
+      font-size: clamp(16px, 4vw, 21px);
+      font-weight: 700;
+      word-break: break-all;
+    }
+
+    .note {
+      margin-top: 30px;
+      padding-top: 26px;
+      border-top: 1px solid rgba(255, 255, 255, 0.08);
+    }
+
+    footer {
+      padding: 30px 0 38px;
+      border-top: 1px solid rgba(255, 255, 255, 0.07);
+      color: #8fa3b7;
+      font-size: 13px;
+    }
+
+    .footer-row {
+      display: flex;
+      justify-content: space-between;
+      flex-wrap: wrap;
+      gap: 16px;
+    }
+
+    @media (max-width: 700px) {
+      main {
+        padding-top: 48px;
+      }
+
+      .contact-card {
+        padding: 22px;
+      }
+    }
+  </style>
+</head>
+
+<body>
+
+<header>
+  <div class="container nav">
+
+    <a class="brand" href="index.html">
+      Live Chat <span>Overlay Maker</span>
+    </a>
+
+    <a class="back" href="index.html">
+      ← ホームへ戻る
+    </a>
+
+  </div>
+</header>
+
+
+<main>
+  <div class="container">
+
+    <div class="eyebrow">CONTACT</div>
+
+    <h1>お問い合わせ</h1>
+
+    <p class="lead">
+      Live Chat Overlay Makerに関するお問い合わせはこちらからお願いします。
+    </p>
+
+
+    <div class="contact-card">
+
+      <h2>お問い合わせ先</h2>
+
+      <p>
+        Live Chat Overlay Makerについてのご質問、
+        不具合のご報告、プライバシーに関するご相談などは、
+        以下のメールアドレスまでご連絡ください。
+      </p>
+
+
+      <div class="email-box">
+
+        <div class="email-label">
+          Email
+        </div>
+
+        <div class="email">
+          <a href="mailto:livechatoverlaymaker@gmail.com">
+            livechatoverlaymaker@gmail.com
+          </a>
+        </div>
+
+      </div>
+
+
+      <p>
+        お問い合わせの際は、可能であれば以下の情報を
+        あわせてお知らせください。
+      </p>
+
+      <ul>
+        <li>お問い合わせ内容</li>
+        <li>発生している問題や状況</li>
+        <li>利用している機能やデータ形式</li>
+        <li>エラーが発生した場合は、その内容</li>
+      </ul>
+
+
+      <div class="note">
+
+        <h2>プライバシーに関するお問い合わせ</h2>
+
+        <p>
+          個人情報、ユーザーデータ、データの削除その他の
+          プライバシーに関するお問い合わせについても、
+          上記メールアドレスで受け付けます。
+        </p>
+
+        <p>
+          データの取り扱いについては、
+          <a href="privacy.html">プライバシーポリシー</a>
+          もご確認ください。
+        </p>
+
+      </div>
+
+
+      <div class="note">
+
+        <h2>ご注意</h2>
+
+        <p>
+          お問い合わせ内容によっては、
+          回答までに時間を要する場合があります。
+        </p>
+
+        <p>
+          パスワード、認証コード、APIキー、
+          クライアントシークレットなどの機密情報は、
+          メール本文や添付ファイルに記載しないでください。
+        </p>
+
+      </div>
+
+    </div>
+
+  </div>
+</main>
+
+
+<footer>
+  <div class="container footer-row">
+
+    <div>
+      © 2026 Live Chat Overlay Maker
+    </div>
+
+    <div>
+      <a href="index.html">ホーム</a>
+      　
+      <a href="privacy.html">プライバシーポリシー</a>
+      　
+      <a href="terms.html">利用規約</a>
+    </div>
+
+  </div>
+</footer>
+
+</body>
+</html>
