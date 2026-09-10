@@ -1,0 +1,1275 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+  <title>Live Chat Overlay Maker</title>
+
+  <meta
+    name="description"
+    content="Live Chat Overlay Makerは、配信後のチャットデータを動画の時間軸に合わせて表示し、動画編集で使えるオーバーレイ映像として書き出すWindowsデスクトップアプリです。"
+  >
+
+  <style>
+    :root {
+      --bg: #061321;
+      --bg-deep: #030b14;
+      --panel: #0b1d31;
+      --panel-light: #102943;
+      --line: rgba(70, 170, 255, 0.24);
+
+      --text: #f5f8fc;
+      --muted: #aab9ca;
+
+      --blue: #1688ff;
+      --cyan: #1dc8ff;
+      --navy: #0f2d6b;
+
+      --max-width: 1180px;
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    html {
+      scroll-behavior: smooth;
+    }
+
+    body {
+      margin: 0;
+      font-family:
+        -apple-system,
+        BlinkMacSystemFont,
+        "Segoe UI",
+        "Noto Sans JP",
+        sans-serif;
+      color: var(--text);
+      background:
+        radial-gradient(
+          circle at 70% 10%,
+          rgba(22, 136, 255, 0.18),
+          transparent 30%
+        ),
+        linear-gradient(
+          180deg,
+          var(--bg) 0%,
+          var(--bg-deep) 100%
+        );
+      line-height: 1.7;
+    }
+
+    a {
+      color: inherit;
+      text-decoration: none;
+    }
+
+    .container {
+      width: min(calc(100% - 40px), var(--max-width));
+      margin: 0 auto;
+    }
+
+    header {
+      position: sticky;
+      top: 0;
+      z-index: 50;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.07);
+      background: rgba(3, 11, 20, 0.86);
+      backdrop-filter: blur(18px);
+    }
+
+    .nav {
+      min-height: 74px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 28px;
+    }
+
+    .brand {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      font-weight: 700;
+      letter-spacing: -0.02em;
+      white-space: nowrap;
+    }
+
+    .brand-mark {
+      width: 42px;
+      height: 42px;
+      flex: 0 0 42px;
+    }
+
+    .brand-name span {
+      color: var(--cyan);
+    }
+
+    .nav-links {
+      display: flex;
+      align-items: center;
+      gap: 28px;
+      color: #dce7f2;
+      font-size: 14px;
+    }
+
+    .nav-links a:hover {
+      color: var(--cyan);
+    }
+
+    .hero {
+      padding: 82px 0 70px;
+      overflow: hidden;
+    }
+
+    .hero-grid {
+      display: grid;
+      grid-template-columns: 0.95fr 1.05fr;
+      gap: 56px;
+      align-items: center;
+    }
+
+    .eyebrow {
+      display: inline-flex;
+      align-items: center;
+      gap: 10px;
+      margin-bottom: 18px;
+      color: #c8ddf0;
+      font-weight: 700;
+      font-size: 17px;
+    }
+
+    .eyebrow::before {
+      content: "";
+      width: 32px;
+      height: 2px;
+      background: linear-gradient(90deg, var(--blue), var(--cyan));
+    }
+
+    h1 {
+      margin: 0;
+      line-height: 0.97;
+      letter-spacing: -0.055em;
+      font-size: clamp(52px, 6vw, 88px);
+    }
+
+    h1 .blue {
+      display: block;
+      background: linear-gradient(90deg, #0780ff, #16c6ff);
+      -webkit-background-clip: text;
+      background-clip: text;
+      color: transparent;
+    }
+
+    .hero-copy {
+      margin: 26px 0 0;
+      max-width: 590px;
+      color: #dbe6f1;
+      font-size: 21px;
+      font-weight: 600;
+      line-height: 1.65;
+    }
+
+    .hero-description {
+      margin: 18px 0 0;
+      max-width: 610px;
+      color: var(--muted);
+      font-size: 15px;
+    }
+
+    .hero-actions {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 14px;
+      margin-top: 30px;
+    }
+
+    .button {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      min-height: 50px;
+      padding: 0 23px;
+      border-radius: 10px;
+      border: 1px solid rgba(255, 255, 255, 0.12);
+      font-weight: 700;
+      transition: 0.2s ease;
+    }
+
+    .button-primary {
+      background: linear-gradient(135deg, #0679ff, #179cff);
+      box-shadow: 0 10px 30px rgba(0, 123, 255, 0.25);
+    }
+
+    .button-secondary {
+      background: rgba(255, 255, 255, 0.035);
+    }
+
+    .button:hover {
+      transform: translateY(-2px);
+    }
+
+    .hero-note {
+      margin-top: 14px;
+      color: #788da1;
+      font-size: 12px;
+    }
+
+    .editor-card {
+      position: relative;
+      padding: 12px;
+      border: 1px solid rgba(40, 171, 255, 0.5);
+      border-radius: 18px;
+      background:
+        linear-gradient(
+          145deg,
+          rgba(14, 48, 82, 0.95),
+          rgba(4, 14, 27, 0.98)
+        );
+      box-shadow:
+        0 28px 80px rgba(0, 0, 0, 0.38),
+        0 0 70px rgba(0, 128, 255, 0.12);
+      transform: perspective(1200px) rotateY(-4deg) rotateX(1deg);
+    }
+
+    .editor-top {
+      height: 28px;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      padding: 0 8px;
+    }
+
+    .dot {
+      width: 7px;
+      height: 7px;
+      border-radius: 50%;
+      background: #48627a;
+    }
+
+    .preview {
+      position: relative;
+      min-height: 310px;
+      overflow: hidden;
+      border-radius: 11px;
+      background:
+        radial-gradient(
+          circle at 70% 18%,
+          rgba(80, 190, 255, 0.82),
+          transparent 15%
+        ),
+        radial-gradient(
+          circle at 25% 70%,
+          rgba(28, 112, 68, 0.85),
+          transparent 26%
+        ),
+        linear-gradient(
+          145deg,
+          #284563 0%,
+          #4f7598 30%,
+          #15283d 52%,
+          #123d31 75%,
+          #07151c 100%
+        );
+    }
+
+    .mountain {
+      position: absolute;
+      left: 10%;
+      bottom: 0;
+      width: 62%;
+      height: 73%;
+      clip-path: polygon(
+        0 100%,
+        10% 72%,
+        21% 78%,
+        35% 36%,
+        46% 59%,
+        59% 18%,
+        68% 45%,
+        76% 31%,
+        100% 100%
+      );
+      background:
+        linear-gradient(
+          145deg,
+          #325c76 0%,
+          #102b35 44%,
+          #0b1b23 100%
+        );
+      opacity: 0.96;
+    }
+
+    .player {
+      position: absolute;
+      left: 36%;
+      bottom: 17%;
+      width: 34px;
+      height: 70px;
+      border-radius: 16px 16px 8px 8px;
+      background: #0b1620;
+      box-shadow: 0 0 18px rgba(0, 0, 0, 0.45);
+    }
+
+    .player::before {
+      content: "";
+      position: absolute;
+      width: 28px;
+      height: 28px;
+      top: -18px;
+      left: 3px;
+      border-radius: 50%;
+      background: #101d27;
+    }
+
+    .chat-panel {
+      position: absolute;
+      top: 26px;
+      right: 22px;
+      width: min(46%, 255px);
+      padding: 13px;
+      border-radius: 14px;
+      border: 1px solid rgba(65, 190, 255, 0.58);
+      background: rgba(2, 12, 23, 0.77);
+      backdrop-filter: blur(7px);
+      box-shadow: 0 12px 32px rgba(0, 0, 0, 0.28);
+    }
+
+    .chat-line {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      margin: 7px 0;
+      color: #eef7ff;
+      font-size: 11px;
+    }
+
+    .avatar {
+      width: 19px;
+      height: 19px;
+      border-radius: 50%;
+      flex: 0 0 19px;
+      background: linear-gradient(135deg, #397aff, #24d2ff);
+    }
+
+    .avatar.purple {
+      background: linear-gradient(135deg, #7545ff, #df4cff);
+    }
+
+    .avatar.green {
+      background: linear-gradient(135deg, #11a86b, #5de8a1);
+    }
+
+    .avatar.orange {
+      background: linear-gradient(135deg, #ff7a32, #ffc350);
+    }
+
+    .timeline {
+      padding: 18px 15px 15px;
+      background: #07121f;
+    }
+
+    .track {
+      position: relative;
+      height: 18px;
+      margin: 7px 0;
+      border-radius: 5px;
+      background: #172c3f;
+      overflow: hidden;
+    }
+
+    .track.video::after {
+      content: "";
+      position: absolute;
+      inset: 3px 7% 3px 4%;
+      border-radius: 4px;
+      background: linear-gradient(90deg, #6839c6, #994ce3);
+    }
+
+    .track.chat::after {
+      content: "";
+      position: absolute;
+      inset: 3px 17% 3px 14%;
+      border-radius: 4px;
+      background:
+        repeating-linear-gradient(
+          90deg,
+          #137edb 0 58px,
+          #50a9ee 58px 72px
+        );
+    }
+
+    .track.audio::after {
+      content: "";
+      position: absolute;
+      inset: 3px 4%;
+      border-radius: 4px;
+      background:
+        repeating-linear-gradient(
+          90deg,
+          #00a1ab 0 3px,
+          #0bd3c3 3px 6px
+        );
+      opacity: 0.82;
+    }
+
+    .playhead {
+      position: absolute;
+      left: 42%;
+      bottom: 11px;
+      width: 1px;
+      height: 92px;
+      background: #1ed7ff;
+      box-shadow: 0 0 12px #1ed7ff;
+    }
+
+    .playhead::before {
+      content: "";
+      position: absolute;
+      top: -5px;
+      left: -4px;
+      width: 9px;
+      height: 9px;
+      transform: rotate(45deg);
+      background: #1ed7ff;
+    }
+
+    .script-copy {
+      margin: 23px 10px 0;
+      text-align: right;
+      color: #19baff;
+      font-size: 21px;
+      font-style: italic;
+      transform: rotate(-3deg);
+    }
+
+    section {
+      padding: 72px 0;
+    }
+
+    .section-heading {
+      margin-bottom: 28px;
+    }
+
+    .section-heading span {
+      color: var(--cyan);
+      font-size: 12px;
+      font-weight: 700;
+      letter-spacing: 0.18em;
+    }
+
+    h2 {
+      margin: 4px 0 0;
+      font-size: clamp(30px, 4vw, 42px);
+      letter-spacing: -0.035em;
+    }
+
+    .feature-grid {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 16px;
+    }
+
+    .card {
+      min-height: 230px;
+      padding: 24px;
+      border: 1px solid var(--line);
+      border-radius: 14px;
+      background:
+        linear-gradient(
+          160deg,
+          rgba(16, 41, 67, 0.82),
+          rgba(6, 20, 34, 0.8)
+        );
+    }
+
+    .card-icon {
+      width: 48px;
+      height: 48px;
+      margin-bottom: 20px;
+      display: grid;
+      place-items: center;
+      border-radius: 12px;
+      color: white;
+      font-size: 22px;
+      background: linear-gradient(135deg, var(--blue), var(--cyan));
+    }
+
+    .card h3 {
+      margin: 0 0 10px;
+      font-size: 18px;
+    }
+
+    .card p {
+      margin: 0;
+      color: var(--muted);
+      font-size: 14px;
+    }
+
+    .styles {
+      background: rgba(5, 17, 29, 0.55);
+      border-top: 1px solid rgba(255, 255, 255, 0.04);
+      border-bottom: 1px solid rgba(255, 255, 255, 0.04);
+    }
+
+    .style-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 18px;
+    }
+
+    .style-preview {
+      min-height: 310px;
+    }
+
+    .mini-screen {
+      position: relative;
+      height: 150px;
+      overflow: hidden;
+      margin-bottom: 18px;
+      border-radius: 10px;
+      background:
+        radial-gradient(
+          circle at 30% 30%,
+          rgba(48, 145, 190, 0.6),
+          transparent 24%
+        ),
+        linear-gradient(145deg, #16334c, #10251d 68%, #071019);
+    }
+
+    .mini-chat {
+      position: absolute;
+      inset: 18px 18px auto;
+      padding: 10px 12px;
+      border-radius: 10px;
+      font-size: 10px;
+      line-height: 1.9;
+    }
+
+    .transparent-style .mini-chat {
+      background:
+        linear-gradient(
+          45deg,
+          rgba(255,255,255,0.12) 25%,
+          transparent 25%,
+          transparent 75%,
+          rgba(255,255,255,0.12) 75%
+        );
+      background-size: 18px 18px;
+    }
+
+    .twitch-style .mini-chat {
+      background: rgba(0, 0, 0, 0.82);
+    }
+
+    .nico-style .flow {
+      position: absolute;
+      color: white;
+      font-size: 13px;
+      font-weight: 700;
+      white-space: nowrap;
+      text-shadow: 0 1px 4px black;
+    }
+
+    .nico-style .f1 {
+      top: 24px;
+      left: 12px;
+    }
+
+    .nico-style .f2 {
+      top: 61px;
+      right: 18px;
+    }
+
+    .nico-style .f3 {
+      top: 98px;
+      left: 72px;
+    }
+
+    .steps-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 16px;
+    }
+
+    .step-number {
+      width: 38px;
+      height: 38px;
+      display: grid;
+      place-items: center;
+      margin-bottom: 18px;
+      border-radius: 50%;
+      font-weight: 800;
+      background: linear-gradient(135deg, #095ff0, #19b6ff);
+    }
+
+    .platform-row {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      border: 1px solid var(--line);
+      border-radius: 14px;
+      overflow: hidden;
+      background: rgba(8, 26, 44, 0.62);
+    }
+
+    .platform {
+      padding: 25px;
+    }
+
+    .platform + .platform {
+      border-left: 1px solid var(--line);
+    }
+
+    .platform strong {
+      display: block;
+      margin-bottom: 8px;
+      font-size: 18px;
+    }
+
+    .platform p {
+      margin: 0;
+      color: var(--muted);
+      font-size: 13px;
+    }
+
+    .platform.preparing {
+      opacity: 0.68;
+    }
+
+    .badge {
+      display: inline-block;
+      margin-left: 7px;
+      padding: 3px 8px;
+      border-radius: 999px;
+      color: #c8d5df;
+      background: rgba(255, 255, 255, 0.1);
+      font-size: 10px;
+      vertical-align: middle;
+    }
+
+    .cta {
+      padding-top: 35px;
+      padding-bottom: 70px;
+    }
+
+    .cta-box {
+      padding: 42px;
+      border: 1px solid rgba(39, 160, 255, 0.32);
+      border-radius: 18px;
+      text-align: center;
+      background:
+        radial-gradient(
+          circle at 50% 0%,
+          rgba(20, 134, 255, 0.2),
+          transparent 46%
+        ),
+        linear-gradient(
+          135deg,
+          rgba(14, 44, 73, 0.92),
+          rgba(4, 15, 27, 0.95)
+        );
+    }
+
+    .cta-box h2 {
+      margin-top: 0;
+    }
+
+    .cta-box p {
+      color: var(--muted);
+    }
+
+    footer {
+      padding: 34px 0 42px;
+      border-top: 1px solid rgba(255, 255, 255, 0.07);
+      color: #91a4b8;
+      font-size: 13px;
+    }
+
+    .footer-grid {
+      display: flex;
+      justify-content: space-between;
+      gap: 30px;
+      align-items: flex-start;
+    }
+
+    .footer-links {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 18px;
+    }
+
+    .footer-links a:hover {
+      color: white;
+    }
+
+    @media (max-width: 950px) {
+      .hero-grid {
+        grid-template-columns: 1fr;
+      }
+
+      .editor-card {
+        transform: none;
+      }
+
+      .feature-grid {
+        grid-template-columns: repeat(2, 1fr);
+      }
+
+      .style-grid,
+      .steps-grid {
+        grid-template-columns: 1fr;
+      }
+
+      .platform-row {
+        grid-template-columns: 1fr;
+      }
+
+      .platform + .platform {
+        border-left: 0;
+        border-top: 1px solid var(--line);
+      }
+    }
+
+    @media (max-width: 720px) {
+      .nav-links {
+        display: none;
+      }
+
+      .hero {
+        padding-top: 58px;
+      }
+
+      .feature-grid {
+        grid-template-columns: 1fr;
+      }
+
+      .preview {
+        min-height: 250px;
+      }
+
+      .chat-panel {
+        width: 52%;
+        right: 12px;
+      }
+
+      .footer-grid {
+        flex-direction: column;
+      }
+    }
+  </style>
+</head>
+
+<body>
+
+<header>
+  <div class="container nav">
+
+    <a class="brand" href="#top">
+
+      <svg
+        class="brand-mark"
+        viewBox="0 0 100 100"
+        aria-label="Live Chat Overlay Maker logo"
+        role="img"
+      >
+        <defs>
+          <linearGradient id="logoGradient" x1="0" y1="0" x2="1" y2="1">
+            <stop offset="0%" stop-color="#20d4ff"/>
+            <stop offset="100%" stop-color="#0869ff"/>
+          </linearGradient>
+        </defs>
+
+        <path
+          d="M18 16h48c10 0 18 8 18 18v30H69V38c0-5-4-9-9-9H27c-5 0-9 4-9 9v20c0 5 4 9 9 9h12v14L53 67h7v13H27c-13 0-23-10-23-23V39c0-13 6-23 14-23z"
+          fill="url(#logoGradient)"
+        />
+
+        <circle cx="30" cy="48" r="5" fill="#23c7ff"/>
+        <circle cx="44" cy="48" r="5" fill="#23c7ff"/>
+        <circle cx="58" cy="48" r="5" fill="#23c7ff"/>
+
+        <path
+          d="M56 59v25c0 6 7 9 12 6l23-15c5-3 5-10 0-13L68 47c-5-3-12 1-12 12z"
+          fill="url(#logoGradient)"
+        />
+      </svg>
+
+      <div class="brand-name">
+        Live Chat <span>Overlay Maker</span>
+      </div>
+
+    </a>
+
+    <nav class="nav-links">
+      <a href="#features">主な特徴</a>
+      <a href="#styles">表示スタイル</a>
+      <a href="#how">使い方</a>
+      <a href="#platforms">対応状況</a>
+      <a href="#about">製品について</a>
+    </nav>
+
+  </div>
+</header>
+
+
+<main id="top">
+
+  <section class="hero">
+
+    <div class="container hero-grid">
+
+      <div>
+
+        <div class="eyebrow">
+          配信が終わっても、チャットは素材になる。
+        </div>
+
+        <h1>
+          Live Chat
+          <span class="blue">Overlay Maker</span>
+        </h1>
+
+        <p class="hero-copy">
+          ライブ配信のチャットを、<br>
+          動画編集で使えるオーバーレイ素材へ。
+        </p>
+
+        <p class="hero-description">
+          Live Chat Overlay Makerは、配信後のチャットデータを読み込み、
+          コメントの投稿時刻を動画のタイムラインに合わせて表示し、
+          動画編集ソフトで使えるオーバーレイ映像として書き出す
+          Windows向けデスクトップアプリです。
+        </p>
+
+        <div class="hero-actions">
+          <a class="button button-primary" href="#about">
+            製品について
+          </a>
+
+          <a class="button button-secondary" href="#how">
+            使い方を見る
+          </a>
+        </div>
+
+        <div class="hero-note">
+          Windows向けデスクトップアプリとして開発中
+        </div>
+
+      </div>
+
+
+      <div>
+
+        <div class="editor-card">
+
+          <div class="editor-top">
+            <span class="dot"></span>
+            <span class="dot"></span>
+            <span class="dot"></span>
+          </div>
+
+          <div class="preview">
+
+            <div class="mountain"></div>
+            <div class="player"></div>
+
+            <div class="chat-panel">
+
+              <div class="chat-line">
+                <span class="avatar purple"></span>
+                Yuki　最高の配信でした！
+              </div>
+
+              <div class="chat-line">
+                <span class="avatar orange"></span>
+                Taro　めっちゃ楽しかった！
+              </div>
+
+              <div class="chat-line">
+                <span class="avatar"></span>
+                Mei　また見たい！
+              </div>
+
+              <div class="chat-line">
+                <span class="avatar green"></span>
+                Sora　ありがとう！
+              </div>
+
+              <div class="chat-line">
+                <span class="avatar purple"></span>
+                Kenta　次回も楽しみ！
+              </div>
+
+            </div>
+
+          </div>
+
+          <div class="timeline">
+
+            <div class="track video"></div>
+            <div class="track chat"></div>
+            <div class="track audio"></div>
+
+            <div class="playhead"></div>
+
+          </div>
+
+        </div>
+
+        <div class="script-copy">
+          あの時のコメントを、映像に残そう。
+        </div>
+
+      </div>
+
+    </div>
+
+  </section>
+
+
+  <section id="features">
+
+    <div class="container">
+
+      <div class="section-heading">
+        <span>FEATURES</span>
+        <h2>主な特徴</h2>
+      </div>
+
+      <div class="feature-grid">
+
+        <article class="card">
+
+          <div class="card-icon">💬</div>
+
+          <h3>チャットデータを読み込み</h3>
+
+          <p>
+            対応するチャットデータやCSVファイルを読み込み、
+            動画編集用の素材として利用できます。
+          </p>
+
+        </article>
+
+
+        <article class="card">
+
+          <div class="card-icon">◷</div>
+
+          <h3>時間に合わせて表示</h3>
+
+          <p>
+            コメントの投稿時刻をもとに、
+            動画のタイムラインに同期したチャット表示を作成します。
+          </p>
+
+        </article>
+
+
+        <article class="card">
+
+          <div class="card-icon">✦</div>
+
+          <h3>自由にカスタマイズ</h3>
+
+          <p>
+            フォント、サイズ、背景、表示範囲などを調整し、
+            動画に合わせたチャット表現を作成できます。
+          </p>
+
+        </article>
+
+
+        <article class="card">
+
+          <div class="card-icon">▶</div>
+
+          <h3>選べる表示スタイル</h3>
+
+          <p>
+            透明なオーバーレイ、黒背景のチャット表示、
+            画面上を流れるコメント表示など、
+            用途に合わせたスタイルで書き出せます。
+          </p>
+
+        </article>
+
+      </div>
+
+    </div>
+
+  </section>
+
+
+  <section class="styles" id="styles">
+
+    <div class="container">
+
+      <div class="section-heading">
+        <span>EXPORT STYLES</span>
+        <h2>選べる書き出しスタイル</h2>
+      </div>
+
+      <div class="style-grid">
+
+        <article class="card style-preview transparent-style">
+
+          <div class="mini-screen">
+
+            <div class="mini-chat">
+              ● Yuki　最高の配信でした！<br>
+              ● Taro　また見たい！<br>
+              ● Mei　ありがとう！
+            </div>
+
+          </div>
+
+          <h3>透過スタイル</h3>
+
+          <p>
+            背景を透過したチャット素材として書き出し、
+            動画編集ソフト上で映像に重ねて使用できます。
+          </p>
+
+        </article>
+
+
+        <article class="card style-preview twitch-style">
+
+          <div class="mini-screen">
+
+            <div class="mini-chat">
+              ● Yuki　最高の配信でした！<br>
+              ● Taro　また見たい！<br>
+              ● Mei　ありがとう！
+            </div>
+
+          </div>
+
+          <h3>Twitch風スタイル</h3>
+
+          <p>
+            黒系の背景にチャットを並べる、
+            配信チャットらしい見やすい表示スタイルです。
+          </p>
+
+        </article>
+
+
+        <article class="card style-preview nico-style">
+
+          <div class="mini-screen">
+
+            <div class="flow f1">最高だった！</div>
+            <div class="flow f2">また見たい！</div>
+            <div class="flow f3">ありがとう！　www</div>
+
+          </div>
+
+          <h3>ニコニコ風スタイル</h3>
+
+          <p>
+            コメントを画面上に流して表示する、
+            動きのあるチャット表現として書き出せます。
+          </p>
+
+        </article>
+
+      </div>
+
+    </div>
+
+  </section>
+
+
+  <section id="how">
+
+    <div class="container">
+
+      <div class="section-heading">
+        <span>HOW IT WORKS</span>
+        <h2>使い方はシンプルな3ステップ</h2>
+      </div>
+
+      <div class="steps-grid">
+
+        <article class="card">
+
+          <div class="step-number">1</div>
+
+          <h3>チャットデータを用意</h3>
+
+          <p>
+            対応するチャットデータや、
+            エクスポートしたCSVファイルを読み込みます。
+          </p>
+
+        </article>
+
+
+        <article class="card">
+
+          <div class="step-number">2</div>
+
+          <h3>表示スタイルと範囲を設定</h3>
+
+          <p>
+            プレビューを確認しながら、
+            表示する時間範囲やデザインを調整します。
+          </p>
+
+        </article>
+
+
+        <article class="card">
+
+          <div class="step-number">3</div>
+
+          <h3>オーバーレイ映像を書き出す</h3>
+
+          <p>
+            設定した内容で映像を書き出し、
+            動画編集ソフトへ追加して仕上げます。
+          </p>
+
+        </article>
+
+      </div>
+
+    </div>
+
+  </section>
+
+
+  <section id="platforms">
+
+    <div class="container">
+
+      <div class="section-heading">
+        <span>SUPPORTED DATA SOURCES</span>
+        <h2>対応状況</h2>
+      </div>
+
+      <div class="platform-row">
+
+        <div class="platform">
+
+          <strong>Twitch</strong>
+
+          <p>
+            配信後のチャットデータを利用した
+            動画編集向けオーバーレイ作成に対応しています。
+          </p>
+
+        </div>
+
+
+        <div class="platform">
+
+          <strong>CSVファイル</strong>
+
+          <p>
+            対応形式のCSVチャットデータを読み込み、
+            オーバーレイ映像の作成に利用できます。
+          </p>
+
+        </div>
+
+
+        <div class="platform preparing">
+
+          <strong>
+            YouTube
+            <span class="badge">準備中</span>
+          </strong>
+
+          <p>
+            YouTube API Servicesを利用する機能については、
+            適切な承認およびポリシーへの準拠を確認しながら
+            提供準備を進めています。
+          </p>
+
+        </div>
+
+      </div>
+
+    </div>
+
+  </section>
+
+
+  <section id="about">
+
+    <div class="container">
+
+      <div class="section-heading">
+        <span>ABOUT</span>
+        <h2>配信の思い出を、編集できる素材へ。</h2>
+      </div>
+
+      <div class="card">
+
+        <p>
+          Live Chat Overlay Makerは、
+          ライブ配信終了後のチャットを動画の時間軸に合わせて再現し、
+          動画編集で利用できる素材として書き出すことを目的とした
+          Windowsデスクトップアプリです。
+        </p>
+
+        <p>
+          配信者自身の動画編集だけでなく、
+          権限を持つ編集者が配信アーカイブから動画を制作する場面でも、
+          チャットを映像表現の一部として活用できることを目指しています。
+        </p>
+
+      </div>
+
+    </div>
+
+  </section>
+
+
+  <section class="cta">
+
+    <div class="container">
+
+      <div class="cta-box">
+
+        <h2>あの時のコメントを、映像に残そう。</h2>
+
+        <p>
+          Live Chat Overlay Makerは現在、
+          正式公開に向けて開発と準備を進めています。
+        </p>
+
+      </div>
+
+    </div>
+
+  </section>
+
+</main>
+
+
+<footer>
+
+  <div class="container footer-grid">
+
+    <div>
+      <strong>Live Chat Overlay Maker</strong><br>
+      配信チャットを、動画編集で使えるオーバーレイ素材へ。
+    </div>
+
+    <div class="footer-links">
+      <a href="privacy.html">プライバシーポリシー</a>
+      <a href="terms.html">利用規約</a>
+      <a href="contact.html">お問い合わせ</a>
+    </div>
+
+  </div>
+
+</footer>
+
+</body>
+</html>
